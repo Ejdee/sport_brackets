@@ -4,6 +4,8 @@ import 'kumite.dart';
 import 'category_grid.dart';
 import '../components/category_card.dart';
 
+bool showKata = true;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -12,7 +14,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _showKata = true;
   List<Widget> _categories = [];
   final TextEditingController _ageKumiteController = TextEditingController();
   final TextEditingController _ageKataController = TextEditingController();
@@ -23,10 +24,15 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _categories = List.from(_categories)..add(
         CategoryCard(
-          key: const Key('categoryCard'),
-          age: _showKata ? _ageKataController.text : _ageKumiteController.text,
+          key: UniqueKey(),
+          age: showKata ? _ageKataController.text : _ageKumiteController.text,
           weight: _weightController.text,
           rank: _rankController.text,
+          onDelete: (key) {
+            setState(() {
+              _categories.removeWhere((card) => card.key == key);
+            });
+          },
         )
       );
     });
@@ -67,8 +73,8 @@ class _HomePageState extends State<HomePage> {
           const Text('Manage Categories',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          // display either kata or kumite screen based on _showKata value
-          _showKata ? KataScreen(ageKataController: _ageKataController, rankController: _rankController,)
+          // display either kata or kumite screen based on showKata value
+          showKata ? KataScreen(ageKataController: _ageKataController, rankController: _rankController,)
            : KumiteScreen(ageKumiteController: _ageKumiteController, weightController: _weightController),
           ElevatedButton(
             onPressed: _addCategory,
@@ -84,7 +90,7 @@ class _HomePageState extends State<HomePage> {
                 child: const Text('Show Kata'),
                 onPressed: () {
                   setState(() {
-                    _showKata = true;
+                    showKata = true;
                   });
                 },
               ),
@@ -92,7 +98,7 @@ class _HomePageState extends State<HomePage> {
                 child: const Text('Show Kumite'),
                 onPressed: () {
                   setState(() {
-                    _showKata = false;
+                    showKata = false;
                   });
                 },
               ),
