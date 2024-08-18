@@ -13,7 +13,7 @@ class _CategoryGridState extends State<CategoryGrid> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
       child: GridView.builder(
         shrinkWrap: true,
         itemCount: widget.categories.length,
