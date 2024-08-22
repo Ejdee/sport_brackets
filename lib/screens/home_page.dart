@@ -5,6 +5,7 @@ import 'category_grid.dart';
 import '../components/category_card.dart';
 import '../components/switch_category_button.dart';
 import '../components/main_scaffold.dart';
+import '../data_manage/category_manager.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,7 +32,7 @@ class _HomePageState extends State<HomePage> {
       String rank = _rankController.text;
 
       // add the category to the list of data
-      categoryData.add({
+      CategoryDataManager.instance.addCategory({
         'categoryType': categoryType,
         'age': age,
         showKata ? 'rank' : 'weight' : showKata ? rank : weight,
@@ -49,15 +50,15 @@ class _HomePageState extends State<HomePage> {
               var index = _categories.indexWhere((card) => card.key == key);
               // remove from the list of widgets
               _categories.removeAt(index);
-              // remove from the list of data
-              categoryData.removeAt(index);
+              // remove from the singleton instance
+              CategoryDataManager.instance.removeCategory(index);
             });
           },
           showKata: showKata,
         )
       );
     });
-    print(categoryData);
+    print(CategoryDataManager.instance.categoryData);
   }
 
   @override
