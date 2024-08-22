@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'kata.dart';
-import 'kumite.dart';
+import 'category_input.dart';
 import 'category_grid.dart';
 import '../components/category_card.dart';
 import '../components/switch_category_button.dart';
@@ -15,19 +14,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool showKata = true;
   List<Widget> _categories = [];
-  final TextEditingController _ageKumiteController = TextEditingController();
-  final TextEditingController _ageKataController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _rankController = TextEditingController();
+  final ValueNotifier<String> _categoryNotifier = ValueNotifier<String>('Kata');
 
   List<Map<String, String>> categoryData = [];
 
   void _addCategory() {
     setState(() {
-      String categoryType = showKata ? 'Kata' : 'Kumite';
-      String age = showKata ? _ageKataController.text : _ageKumiteController.text;
+      String categoryType = _categoryNotifier.value;
+      String age = _ageController.text;
       String weight = _weightController.text;
       String rank = _rankController.text;
 
@@ -35,7 +33,8 @@ class _HomePageState extends State<HomePage> {
       CategoryDataManager.instance.addCategory({
         'categoryType': categoryType,
         'age': age,
-        showKata ? 'rank' : 'weight' : showKata ? rank : weight,
+        'rank': (_rankController.text == '-') ? "" : _rankController.text,
+        'weight': (_weightController.text == '-') ? "" : _weightController.text,
       });
 
       _categories = List.from(_categories)..add(
@@ -54,7 +53,7 @@ class _HomePageState extends State<HomePage> {
               CategoryDataManager.instance.removeCategory(index);
             });
           },
-          showKata: showKata,
+          categoryNotifier: _categoryNotifier.value,
         )
       );
     });
@@ -67,15 +66,36 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          const Text('Manage Categories',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          const Padding(
+            padding: EdgeInsets.only(top: 20.0, left: 10.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Add New Category',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
-          // display either kata or kumite screen based on showKata value
-          showKata ? KataScreen(ageKataController: _ageKataController, rankController: _rankController,)
-           : KumiteScreen(ageKumiteController: _ageKumiteController, weightController: _weightController),
-          ElevatedButton(
-            onPressed: _addCategory,
-            child: const Text('Add'),
+          CategoryInputScreen(ageController: _ageController, rankController: _rankController, weightController: _weightController, categoryNotifier: _categoryNotifier),
+          Padding(
+            padding: const EdgeInsets.only(left: 10.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton(
+                onPressed: _addCategory,
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all<Color>(Colors.black), // Background color
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10), // Rounded corners
+                    ),
+                  ),
+                ),
+                child: const Text(
+                  'Add Category',
+                  style: TextStyle(color: Colors.white), // Text color
+                ),
+              ),
+            ),
           ),
           Expanded(
             child: CategoryGrid(key: const Key('categoryGrid'), categories: _categories),
@@ -86,21 +106,13 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 CustomButton(
-                  text: 'Show Kata',
+                  text: 'Create Brackets',
                   onPressed: () {
                     setState(() {
-                      showKata = true;
+                      // I DONT KNOW YET
                     });
                   }
                 ),
-                CustomButton(
-                  text: 'Show Kumite',
-                  onPressed: () {
-                    setState(() {
-                      showKata = false;
-                    });
-                  },
-                )
               ],
             ),
           )
