@@ -21,9 +21,9 @@ class CategoryCard extends StatelessWidget {
   final String? weight;
   final String? rank;
   final Function onDelete;
-  final bool showKata;
+  final String categoryNotifier;
 
-  const CategoryCard({required Key key, required this.age, this.weight, this.rank, required this.onDelete, required this.showKata}) : super(key: key);
+  const CategoryCard({required Key key, required this.age, this.weight, this.rank, required this.onDelete, required this.categoryNotifier}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +40,11 @@ class CategoryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Center( // Add this line
-                  child: Text(showKata ? 'Kata' : 'Kumite', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)), // Wrap this line
+                  child: Text(categoryNotifier, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)), // Wrap this line
                 ), // Add this line
                 StyledText(text: 'Age: $age'),
-                showKata ? StyledText(text: 'Rank: $rank') : StyledText(text: 'Weight: $weight'),
+                StyledText(text: 'Rank: $rank'),
+                StyledText(text: 'Weight: $weight'),
               ],
             ),
           ),
