@@ -5,6 +5,7 @@ import '../components/category_card.dart';
 import '../components/switch_category_button.dart';
 import '../components/main_scaffold.dart';
 import '../data_manage/category_manager.dart';
+import 'bracket.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,8 +34,8 @@ class _HomePageState extends State<HomePage> {
       CategoryDataManager.instance.addCategory({
         'categoryType': categoryType,
         'age': age,
-        'rank': (_rankController.text == '-') ? "" : _rankController.text,
-        'weight': (_weightController.text == '-') ? "" : _weightController.text,
+        'rank': _rankController.text,
+        'weight': _weightController.text,
       });
 
       _categories = List.from(_categories)..add(
@@ -110,6 +111,12 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () {
                     setState(() {
                       // I DONT KNOW YET
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BracketScreen(),
+                        )
+                      );
                     });
                   }
                 ),
@@ -118,6 +125,18 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
+    );
+  }
+}
+
+class BracketScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Bracket Display'),
+      ),
+      body: Bracket(), // Display the Bracket widget
     );
   }
 }

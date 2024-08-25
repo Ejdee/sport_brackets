@@ -43,8 +43,9 @@ class CategoryCard extends StatelessWidget {
                   child: Text(categoryNotifier, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)), // Wrap this line
                 ), // Add this line
                 StyledText(text: 'Age: $age'),
-                StyledText(text: 'Rank: $rank'),
-                StyledText(text: 'Weight: $weight'),
+                // show these two only if it is not empty string
+                rank != "" ? StyledText(text: 'Rank: $rank') : Container(),
+                weight != "" ? StyledText(text: 'Weight: $weight') : Container(),
               ],
             ),
           ),
