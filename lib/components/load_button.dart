@@ -30,10 +30,10 @@ TextButton createLoadButton(BuildContext context) {
                   var cmdata = CategoryDataManager.instance.categoryData;
 
                   // variable to store the categories and the names
-                  Map<String, List<String>> filtered_categories = {};
+                  var filteredCategoriesVar = FilteredCategoryDataManager.instance.filteredCategories;
 
                   // gsheetData is like
-                  // [name, age, weight, rank, kata?, kumite?]
+                  // [name, age, weight, rank, kata?, kumite?, agility?, rychlost?]
 
                   for(var category in cmdata) {
                     for(var person in gsheetData) {
@@ -50,6 +50,10 @@ TextButton createLoadButton(BuildContext context) {
                         fits = false;
                       } else if (category['categoryType'] == 'Kumite' && person[5] != 'ano') {
                         fits = false;
+                      } else if (category['categoryType'] == 'Agility' && person[6] != 'ano') {
+                        fits = false;
+                      } else if (category['categoryType'] == 'Rychlost' && person[7] != 'ano') {
+                        fits = false;
                       }
 
                       // check the age
@@ -58,14 +62,16 @@ TextButton createLoadButton(BuildContext context) {
                         fits = false;
                       }
 
-                      if(category['categoryType'] == 'Kata') {
+                      if(category['rank'] != "") {
                         // check the rank - ALERT: rank is descending
                         var rankRange = category['rank']?.split('-').map(int.parse).toList();
                         if(rank > rankRange![0] || rank < rankRange[1]) {
                           fits = false;
                         }
-                      } else {
-                        // check the weight
+                      }
+
+                      // check the weight
+                      if(category['weight'] != "") {
                         var weightRange = category['weight']?.split('-').map(double.parse).toList();
                         if(weight < weightRange![0] || weight > weightRange[1]) {
                           fits = false;
@@ -74,21 +80,15 @@ TextButton createLoadButton(BuildContext context) {
 
                       if(fits) {
                         // add the person to the category
-                        String categoryName = category['categoryType'] == 'Kata' ?
-                          '${category['categoryType']}_${category['age']}_${category['rank']}' :
-                          '${category['categoryType']}_${category['age']}_${category['weight']}';
+                        String categoryName = '${category['categoryType']}_${category['age']}_${category['weight']}_${category['rank']}';
 
-                        if(!filtered_categories.containsKey(categoryName)) {
-                          filtered_categories[categoryName] = [];
-                        }
-
-                        filtered_categories[categoryName]!.add(name);
+                        FilteredCategoryDataManager.instance.addCategory(categoryName, name); 
                       }
                     }
                   }
 
                   // show the result
-                  print(filtered_categories);
+                  print(FilteredCategoryDataManager.instance.filteredCategories);
                 },
               ),
             ],
