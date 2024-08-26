@@ -1,57 +1,45 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/widgets.dart' as pw;
 import '../components/single_bracket.dart';
-import '../data_manage/category_manager.dart';
 
-class Bracket extends StatelessWidget {
-  Bracket({Key? key}) : super(key: key);
+Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategories) async {
+  final pw.Document doc = pw.Document();
 
-  @override
-  Widget build(BuildContext context) {
-
-    Map<String, List<String>> filteredCategories = FilteredCategoryDataManager.instance.filteredCategories;
-
-    return Column(
-      children: filteredCategories.keys.map((category) {
-        // For each category, create a CategoryBracket widget
-        return CategoryBracket(category: category, participants: filteredCategories[category]!);
-      }).toList(),
-    );
-  }
-}
-
-class CategoryBracket extends StatelessWidget {
-  final String category; // The name of the category
-  final List<String> participants; // The list of participants in this category
-
-  // Constructor to initialize with category name and participants
-  CategoryBracket({required this.category, required this.participants});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start, // Align the content to the start (left)
-      children: [
-        Text(
-          category, // Display the category name
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  filteredCategories.forEach((category, participants) {
+    doc.addPage(
+      pw.Page(
+        orientation: pw.PageOrientation.landscape,
+        build: (pw.Context context) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(
+              category,
+              style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+            ),
+            ..._buildRoundsPdf(participants),
+          ],
         ),
-        ..._buildRounds(participants), // Add the rounds of matches for this category
-      ],
-    );
-  }
-
-  // Helper function to build rounds of matches
-  List<Widget> _buildRounds(List<String> participants) {
-    // This is a simple example, and you need to implement the logic to create rounds.
-    // Assuming 4 participants, 2 rounds.
-
-    return [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Space matches evenly across the row
-        children: participants.map((participant) => SingleBracket(participant: participant)).toList(),
       ),
-      // Add more rows for subsequent rounds (this is just a basic starting point)
-    ];
-  }
+    );
+  });
+
+  return doc.save();
 }
 
+List<pw.Widget> _buildRoundsPdf(List<String> participants) {
+  return [
+    pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
+      children: participants.map((participant) => buildSingleBracketPdf(participant)).toList(),
+    ),
+  ];
+}
+
+Future<String> savePdf(Future<Uint8List> pdfData) async {
+  final output = await getTemporaryDirectory();
+  final file = File("${output.path}/bracket.pdf");
+  await file.writeAsBytes(await pdfData);
+  return file.path;
+}

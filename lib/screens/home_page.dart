@@ -108,16 +108,20 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 CustomButton(
                   text: 'Create Brackets',
-                  onPressed: () {
-                    setState(() {
+                  onPressed: () async {
+                      final pdfData = generateBracketPdf(FilteredCategoryDataManager.instance.filteredCategories);
+                      final path = await savePdf(pdfData);
+                      print('PDF saved to $path');
+                    //setState(() {
                       // I DONT KNOW YET
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BracketScreen(),
-                        )
-                      );
-                    });
+
+                      //Navigator.push(
+                      //  context,
+                      //  MaterialPageRoute(
+                      //    builder: (context) => BracketScreen(),
+                      //  )
+                      //);
+                    //});
                   }
                 ),
               ],
@@ -136,7 +140,7 @@ class BracketScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Bracket Display'),
       ),
-      body: Bracket(), // Display the Bracket widget
+      body: BracketScreen(), // Display the Bracket widget
     );
   }
 }
