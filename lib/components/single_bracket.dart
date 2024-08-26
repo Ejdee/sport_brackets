@@ -1,20 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:pdf/widgets.dart' as pw;
 
-class SingleBracket extends StatelessWidget {
-  final String participant; // The name of the participant in the match
-
-  // Constructor to initialize the match widget with a participant
-  SingleBracket({required this.participant});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8), // Add some padding around the participant name
-      decoration: BoxDecoration(
-        border: Border.all(), // Add a border around the container
-        borderRadius: BorderRadius.circular(8), // Round the corners of the border
-      ),
-      child: Text(participant), // Display the participant's name
-    );
-  }
+pw.Container buildSingleBracketPdf(String participant) {
+  return pw.Container(
+    padding: pw.EdgeInsets.all(8),
+    decoration: pw.BoxDecoration(
+      border: pw.Border.all(),
+      borderRadius: pw.BorderRadius.circular(8),
+    ),
+    child: pw.Text(participant),
+  );
 }
