@@ -54,3 +54,4 @@ class CategoryBracket extends StatelessWidget {
     ];
   }
 }
+
