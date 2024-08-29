@@ -10,8 +10,10 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
   final pw.Document doc = pw.Document();
 
   // get the width and height of a4 page
-  final a4Width = PdfPageFormat.a4.width;
-  final a4Height = PdfPageFormat.a4.height;
+  final a4Width = PdfPageFormat.a4.landscape.width;
+  print("width: $a4Width");
+  final a4Height = PdfPageFormat.a4.landscape.height;
+  print("height: $a4Height");
 
   filteredCategories.forEach((category, participants) {
     // get the number of columns needed for the bracket 
@@ -28,7 +30,7 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
               category,
               style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
             ),
-            _buildRoundsPdf(participants, a4Width, totalColumns),
+            _buildRoundsPdf(participants, a4Width, a4Height, totalColumns),
           ],
         ),
       ),
@@ -38,15 +40,20 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
   return doc.save();
 }
 
-pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, int numberOfColumns) {
+pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4Height, int numberOfColumns) {
   // calculate width of one column
   double columnWidth = a4Width / numberOfColumns;
   // get the number of prerounds if there are any
   int nOfPrerounds = numberOfPrerounds(participants.length);
   // based on the number of prerounds calculate the number of participants in the first round
   int participantsInFirstRound = nOfPrerounds == 0 ? participants.length : nOfPrerounds * 2;
+  print("participantsInFirstRound: $participantsInFirstRound");
   // calculate the number of rows in the first round
   int rowsNumber = participantsInFirstRound ~/ 2;
+  print("rowsNumber: $rowsNumber");
+
+  // this is the height of the single bracket container we defined in the single_bracket.dart
+  int containerHeight = 30;
 
   List<pw.Widget> columns = [];
   // flag to check if it is the first round (where we fill the names)
@@ -57,24 +64,47 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, int numberO
 
     // if it is the first round create the double brackets with the names
     if(firstRound) {
-      for(int i = 0; i < participantsInFirstRound; i += 2) {
+      // calculate the margin available for the brackets
+      double marginAvailable = a4Height - (containerHeight * rowsNumber);
+      print("marginAvailable: $marginAvailable");
+      print("passed margin: ${marginAvailable / rowsNumber}");
+      for(int i = 0; i < rowsNumber; i++) {
         String participant1 = i < participants.length ? participants[i] : '';
         String participant2 = i + 1 < participants.length ? participants[i + 1] : '';
-        brackets.add(
-          buildDoubleBracketPdf(participant1, participant2),
-        );
+        // if it is the last row then we dont want to add margin to the bottom
+        if(i == rowsNumber - 1) {
+          brackets.add(
+            buildDoubleBracketPdf(participant1, participant2, 0),
+          );
+        } else {
+          brackets.add(
+            buildDoubleBracketPdf(participant1, participant2, marginAvailable / rowsNumber),
+          );
+        }
       }
     } else {
       // if it is not the first round calculate the new number of rows
       // which is half of the previous number of rows (rounded up)
       rowsNumber = (rowsNumber + 1) ~/ 2;
+      // calculate the margin available for the brackets
+      double marginAvailable = a4Height - (containerHeight * rowsNumber);
       // if it is last column then add a single bracket to fill the winner
       if(column == numberOfColumns - 1) {
-        brackets.add(buildSingleBracketPdf(""));
+        brackets.add(
+          buildSingleBracketPdf(""),
+        );
       } else {
         // otherwise add the empty double brackets
         for(int i = 0; i < rowsNumber; i++) {
-          brackets.add(buildDoubleBracketPdf("", ""));
+          if(i == rowsNumber - 1) {
+            brackets.add(
+              buildDoubleBracketPdf("", "", 0),
+            );
+          } else {
+            brackets.add(
+              buildDoubleBracketPdf("", "", marginAvailable / rowsNumber),
+            );
+          }
         }
       }
     }
