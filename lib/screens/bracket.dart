@@ -59,7 +59,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
   // flag to check if it is the first round (where we fill the names)
   bool firstRound = true;
 
-  for(int column = 0; column < numberOfColumns; column++) {
+  for(int column = 0; column < numberOfColumns-1; column++) {
     List<pw.Widget> brackets = [];
 
     // if it is the first round create the double brackets with the names
@@ -90,9 +90,9 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
       double marginAvailable = a4Height - (containerHeight * rowsNumber);
       // if it is last column then add a single bracket to fill the winner
       if(column == numberOfColumns - 1) {
-        brackets.add(
-          buildSingleBracketPdf(""),
-        );
+        //brackets.add(
+        //  buildSingleBracketPdf(""),
+        //);
       } else {
         // otherwise add the empty double brackets
         for(int i = 0; i < rowsNumber; i++) {
