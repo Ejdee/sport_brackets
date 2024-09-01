@@ -18,8 +18,10 @@ int numberOfPrerounds(int participantsNumber) {
   // find the smallest power of two that is greater than the number of participants
   // and return the difference - that is how many participants will advance automatically
   for(int i = 0; i < powersOfTwo.length; i++) {
-    if(participantsNumber <= powersOfTwo[i]) {
-      return participantsNumber - powersOfTwo[i];
+    if(participantsNumber < powersOfTwo[i]) {
+      return participantsNumber - powersOfTwo[i-1];
+    } else if (participantsNumber == powersOfTwo[i]) {
+      return 0;
     }
   }
   return -1;

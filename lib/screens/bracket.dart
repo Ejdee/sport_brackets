@@ -22,6 +22,16 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
     // get the number of columns needed for the bracket 
     int totalColumns = numberOfColumns(participants.length);
 
+    var truncatedParticipants = participants.map((participant) {
+      var singleParts = participant.split(" ");
+      if (singleParts.length > 1) {
+        return '${singleParts[0][0]}. ${singleParts.sublist(1).join(' ')}';
+      } else {
+        return participant;
+      }
+    }).toList();
+    print(truncatedParticipants);
+
     doc.addPage(
       pw.Page(
         orientation: pw.PageOrientation.landscape,
@@ -38,7 +48,7 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
                 )
               ),
             ),
-            _buildRoundsPdf(participants, a4Width, a4Height, totalColumns, baseMargin, headerHeight),
+            _buildRoundsPdf(truncatedParticipants, a4Width, a4Height, totalColumns, baseMargin, headerHeight),
           ],
         ),
       ),
@@ -66,9 +76,14 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
   List<pw.Widget> columns = [];
   // flag to check if it is the first round (where we fill the names)
   bool firstRound = true;
+  bool secondRound = nOfPrerounds > 0;
+  // flag to check if there are any prerounds
+  bool preroundsExisting = nOfPrerounds > 0;
+  print("preroundsExisting: $preroundsExisting");
 
   const int extraSpace = 2;
 
+  print("numberOfColumns: $numberOfColumns");
   for(int column = 0; column < numberOfColumns-1; column++) {
     List<pw.Widget> brackets = [];
 
@@ -78,7 +93,8 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
       double marginAvailable = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsNumber);
       print("marginAvailable: $marginAvailable");
       print("passed margin: ${marginAvailable / rowsNumber}");
-      for(int i = 0; i < rowsNumber; i++) {
+      // rowsNumber*2 because we have two participants in each row
+      for(int i = 0; i < rowsNumber*2; i+=2) {
         String participant1 = i < participants.length ? participants[i] : '';
         String participant2 = i + 1 < participants.length ? participants[i + 1] : '';
         // if it is the last row then we dont want to add margin to the bottom
@@ -86,23 +102,69 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           buildDoubleBracketPdf(participant1, participant2, marginAvailable / rowsNumber),
         );
       }
+      if(preroundsExisting) {
+        // this is the formula
+        rowsNumber = (participants.length - nOfPrerounds) ~/ 2;
+        print("rowsNumber after prerounds existing: $rowsNumber");
+      }
     } else {
-      // if it is not the first round calculate the new number of rows
-      // which is half of the previous number of rows (rounded up)
-      rowsNumber = (rowsNumber + 1) ~/ 2;
-      // calculate the margin available for the brackets
-      double marginAvailable = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsNumber);
-      // if it is last column then add a single bracket to fill the winner
-      if(column == numberOfColumns - 1) {
-        //brackets.add(
-        //  buildSingleBracketPdf(""),
-        //);
-      } else {
-        // otherwise add the empty double brackets
-        for(int i = 0; i < rowsNumber; i++) {
+      if(preroundsExisting && secondRound) {
+        // calculate the number of participants left after the prerounds
+        int participantsLeft = participants.length - (nOfPrerounds * 2);
+        // if fill number is greater than 0 then there will be atleast one row with two participants
+        int fillNumber = participantsLeft - rowsNumber;
+        print("fillNumber: $fillNumber");
+
+        // calculate the margin available for the brackets
+        double marginAvailable = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsNumber);
+
+        // get the position of the first participant in the second round
+        // this is the offset for the participnats
+        int iterator = participants.length - participantsLeft;
+        print("iterator: $iterator");
+
+        while(fillNumber != 0 && iterator < participants.length) {
+          if(fillNumber > 0) {
+            fillNumber--;
+            // TODO: add double bracket with two names
+            brackets.add(
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginAvailable/rowsNumber)
+            );
+            iterator += 2;
+          } else if (fillNumber < 0) {
+            fillNumber++;
+            // TODO: add double bracket without names
+            brackets.add(
+              buildDoubleBracketPdf("", "", marginAvailable/rowsNumber)
+            );
+          }
+        }
+
+        // if there are any participants left add them to the brackets with one name
+        for(iterator; iterator < participants.length; iterator++) {
           brackets.add(
-            buildDoubleBracketPdf("", "", marginAvailable / rowsNumber),
+            buildDoubleBracketPdf(participants[iterator], "", marginAvailable/rowsNumber)
           );
+        }
+        secondRound = false;
+      } else {
+        // if it is not the first round calculate the new number of rows
+        // which is half of the previous number of rows (rounded up)
+        rowsNumber = (rowsNumber + 1) ~/ 2;
+        // calculate the margin available for the brackets
+        double marginAvailable = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsNumber);
+        // if it is last column then add a single bracket to fill the winner
+        if(column == numberOfColumns - 1) {
+          //brackets.add(
+          //  buildSingleBracketPdf(""),
+          //);
+        } else {
+          // otherwise add the empty double brackets
+          for(int i = 0; i < rowsNumber; i++) {
+            brackets.add(
+              buildDoubleBracketPdf("", "", marginAvailable / rowsNumber),
+            );
+          }
         }
       }
     }
