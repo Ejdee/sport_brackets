@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:karate_brackets/data_manage/participants_manipulation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../components/single_bracket.dart';
+import '../data_manage/line_drawing.dart';
 
 Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategories) async {
   final pw.Document doc = pw.Document();
@@ -36,21 +38,26 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
       pw.Page(
         orientation: pw.PageOrientation.landscape,
         margin: pw.EdgeInsets.all(baseMargin),
-        build: (pw.Context context) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.ClipRect(
-              child: pw.Container(
-                height: headerHeight,
-                child: pw.Text(
-                  category,
-                  style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
-                )
+        pageFormat: PdfPageFormat.a4.landscape,
+        build: (pw.Context context) {
+//          drawLine(context, 100, 100, 200, 100);
+
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.ClipRect(
+                child: pw.Container(
+                  height: headerHeight,
+                  child: pw.Text(
+                    category,
+                    style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+                  )
+                ),
               ),
-            ),
-            _buildRoundsPdf(truncatedParticipants, a4Width, a4Height, totalColumns, baseMargin, headerHeight),
-          ],
-        ),
+              _buildRoundsPdf(truncatedParticipants, a4Width, a4Height, totalColumns, baseMargin, headerHeight, context),
+            ],
+          );
+        },
       ),
     );
   });
@@ -58,7 +65,7 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
   return doc.save();
 }
 
-pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4Height, int numberOfColumns, double baseMargin, double headerHeight) {
+pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4Height, int numberOfColumns, double baseMargin, double headerHeight, pw.Context context) {
   // calculate width of one column
   double columnWidth = a4Width / numberOfColumns;
   // get the number of prerounds if there are any
@@ -83,14 +90,16 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
 
   const int extraSpace = 2;
 
+  List<int> rounds = [];
+  double marginAvailable = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsNumber);
+
   print("numberOfColumns: $numberOfColumns");
-  for(int column = 0; column < numberOfColumns-1; column++) {
+  for(int column = 0; column < numberOfColumns; column++) {
     List<pw.Widget> brackets = [];
 
     // if it is the first round create the double brackets with the names
     if(firstRound) {
       // calculate the margin available for the brackets 
-      double marginAvailable = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsNumber);
       print("marginAvailable: $marginAvailable");
       print("passed margin: ${marginAvailable / rowsNumber}");
       // rowsNumber*2 because we have two participants in each row
@@ -126,14 +135,12 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
         while(fillNumber != 0 && iterator < participants.length) {
           if(fillNumber > 0) {
             fillNumber--;
-            // TODO: add double bracket with two names
             brackets.add(
               buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginAvailable/rowsNumber)
             );
             iterator += 2;
           } else if (fillNumber < 0) {
             fillNumber++;
-            // TODO: add double bracket without names
             brackets.add(
               buildDoubleBracketPdf("", "", marginAvailable/rowsNumber)
             );
@@ -155,9 +162,9 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
         double marginAvailable = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsNumber);
         // if it is last column then add a single bracket to fill the winner
         if(column == numberOfColumns - 1) {
-          //brackets.add(
-          //  buildSingleBracketPdf(""),
-          //);
+          brackets.add(
+            buildSingleBracketPdf(""),
+          );
         } else {
           // otherwise add the empty double brackets
           for(int i = 0; i < rowsNumber; i++) {
@@ -168,6 +175,19 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
         }
       }
     }
+
+    rounds.add(rowsNumber);
+
+    drawBracketLines(DrawBracketLinesParams(
+      context: context,
+      rows: rounds,
+      marginAvailable: marginAvailable,
+      preroundsExisting: preroundsExisting,
+      containerHeight: containerHeight,
+      baseMargin: baseMargin,
+      extraSpace: extraSpace,
+      columnWidth: columnWidth,
+    ));
 
     // add the column to the list of columns
     columns.add(
@@ -184,6 +204,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
     firstRound = false;
   }
 
+  print("rounds: $rounds");
   return pw.Row(
     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
     children: columns,
