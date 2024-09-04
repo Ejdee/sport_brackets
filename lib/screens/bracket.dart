@@ -92,6 +92,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
 
   List<int> rounds = [];
   double marginAvailable = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsNumber);
+  List<int> nOfParticipantsInSecondRound = [];
 
   print("numberOfColumns: $numberOfColumns");
   for(int column = 0; column < numberOfColumns; column++) {
@@ -111,6 +112,10 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           buildDoubleBracketPdf(participant1, participant2, marginAvailable / rowsNumber),
         );
       }
+
+      // add the number of rows here, because it may be changed after this
+      rounds.add(rowsNumber);
+
       if(preroundsExisting) {
         // this is the formula
         rowsNumber = (participants.length - nOfPrerounds) ~/ 2;
@@ -139,11 +144,13 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
               buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginAvailable/rowsNumber)
             );
             iterator += 2;
+            nOfParticipantsInSecondRound.add(2);
           } else if (fillNumber < 0) {
             fillNumber++;
             brackets.add(
               buildDoubleBracketPdf("", "", marginAvailable/rowsNumber)
             );
+            nOfParticipantsInSecondRound.add(0);
           }
         }
 
@@ -152,6 +159,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           brackets.add(
             buildDoubleBracketPdf(participants[iterator], "", marginAvailable/rowsNumber)
           );
+          nOfParticipantsInSecondRound.add(1);
         }
         secondRound = false;
       } else {
@@ -176,18 +184,11 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
       }
     }
 
-    rounds.add(rowsNumber);
-
-    drawBracketLines(DrawBracketLinesParams(
-      context: context,
-      rows: rounds,
-      marginAvailable: marginAvailable,
-      preroundsExisting: preroundsExisting,
-      containerHeight: containerHeight,
-      baseMargin: baseMargin,
-      extraSpace: extraSpace,
-      columnWidth: columnWidth,
-    ));
+    // since the first round is being added in its iterations
+    // we dont want to add it twice 
+    if(!firstRound) {
+      rounds.add(rowsNumber);
+    }
 
     // add the column to the list of columns
     columns.add(
@@ -204,6 +205,19 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
     firstRound = false;
   }
 
+  drawBracketLines(DrawBracketLinesParams(
+    context: context,
+    rows: rounds,
+    marginAvailable: marginAvailable,
+    preroundsExisting: preroundsExisting,
+    containerHeight: containerHeight,
+    baseMargin: baseMargin,
+    extraSpace: extraSpace,
+    columnWidth: columnWidth,
+    nOfParticipantsInSecondRoundBracket: nOfParticipantsInSecondRound,
+  ));
+
+  print("nOfParticipantsInSecondRound: $nOfParticipantsInSecondRound");
   print("rounds: $rounds");
   return pw.Row(
     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
