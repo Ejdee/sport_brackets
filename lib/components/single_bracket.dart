@@ -1,4 +1,5 @@
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
 
 pw.Container buildDoubleBracketPdf(String participant1, String participant2, double marginTop, double marginBottom) {
   return pw.Container(
@@ -32,7 +33,7 @@ pw.Container buildSingleBracketPdf_withMarginBottom(String participant, double m
     padding: pw.EdgeInsets.only(left: 2),
     margin: pw.EdgeInsets.only(bottom: margin),
     decoration: pw.BoxDecoration(
-      border: pw.Border.all(),
+      border: pw.Border.all(color: PdfColors.red),
     ),
     child: pw.Text(participant),
   );
@@ -45,7 +46,7 @@ pw.Container buildSingleBracketPdf_withMarginTop(String participant, double marg
     padding: pw.EdgeInsets.only(left: 2),
     margin: pw.EdgeInsets.only(top: margin),
     decoration: pw.BoxDecoration(
-      border: pw.Border.all(),
+      border: pw.Border.all(color: PdfColors.blue),
     ),
     child: pw.Text(participant),
   );
