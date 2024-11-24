@@ -78,7 +78,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
   print("rowsNumber: $rowsNumber");
 
   // this is the height of the single bracket container we defined in the single_bracket.dart
-  int containerHeight = 30;
+  int containerHeight = 40;
 
   List<pw.Widget> columns = [];
   // flag to check if it is the first round (where we fill the names)
@@ -88,7 +88,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
   bool preroundsExisting = nOfPrerounds > 0;
   print("preroundsExisting: $preroundsExisting");
 
-  const int extraSpace = 2;
+  const int extraSpace = 12;
 
   List<int> rounds = [];
   double marginAvailable = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsNumber);
@@ -159,6 +159,9 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
       double marginTracker = onePieceMargin;
       double marginBottomTracker = 0;
       int bracketsTracker = 0;
+
+      // we are going to build brackets with priorities over each iteration
+      // it will be DOUBLE, SINGLE, NO and over again
       for(int i = 0; i < rowsInSecondColumn; i++) {
         if(nOfBracketWithTwoNames > 0) {
           // we draw nothing here
@@ -182,7 +185,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
         }
         if(nOfBracketWithNoNames > 0) {
           brackets.add(
-            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker - 17.5, marginBottomTracker)
+            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker - 20, marginBottomTracker)
           );
           iterator += 2;
           bracketsTracker++;
@@ -190,7 +193,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
             marginBottomTracker = calculateBottomMargin(rowsInSecondColumn, bracketsTracker, passingMargin, containerHeight, true);
           }
           brackets.add(
-            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], 5, marginBottomTracker)
+            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], 10, marginBottomTracker)
           );
           iterator += 2;
           bracketsTracker++;
@@ -198,7 +201,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
             marginBottomTracker = calculateBottomMargin(rowsInSecondColumn, bracketsTracker, passingMargin, containerHeight, true);
           }
           nOfBracketWithNoNames--;
-          marginTracker = passingMargin - 17.5;
+          marginTracker = passingMargin - 20;
           print("build double");
         }
       }
@@ -341,7 +344,7 @@ Future<String> savePdf(Future<Uint8List> pdfData) async {
 }
 
 double calculateBottomMargin(int numberOfSecondRoundRows, int currentRow, double passingMargin, int containerHeight, bool isDoubleDoubleBracket) {
-  double result = (isDoubleDoubleBracket) ? -17.5 : 0;
+  double result = (isDoubleDoubleBracket) ? -20 : 0;
   if(isDoubleDoubleBracket) {
     for(int i = currentRow; i < numberOfSecondRoundRows; i++) {
       result += passingMargin;
