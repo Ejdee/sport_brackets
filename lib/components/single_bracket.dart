@@ -6,8 +6,8 @@ pw.Container buildDoubleBracketPdf(String participant1, String participant2, dou
     margin: pw.EdgeInsets.only(top: marginTop, bottom: marginBottom),
     child: pw.Column(
       children: [
-        buildSingleBracketPdf(participant1),
-        buildSingleBracketPdf(participant2),
+        buildSingleBracketPdf_withMarginBottom(participant1, 5),
+        buildSingleBracketPdf_withMarginTop(participant2, 5),
       ],
     ),
   );
@@ -18,6 +18,32 @@ pw.Container buildSingleBracketPdf(String participant) {
     width: 100, // Set a fixed width for the single bracket container
     height: 15,
     padding: pw.EdgeInsets.only(left: 2),
+    decoration: pw.BoxDecoration(
+      border: pw.Border.all(),
+    ),
+    child: pw.Text(participant),
+  );
+}
+
+pw.Container buildSingleBracketPdf_withMarginBottom(String participant, double margin) {
+  return pw.Container(
+    width: 100, // Set a fixed width for the single bracket container
+    height: 15,
+    padding: pw.EdgeInsets.only(left: 2),
+    margin: pw.EdgeInsets.only(bottom: margin),
+    decoration: pw.BoxDecoration(
+      border: pw.Border.all(),
+    ),
+    child: pw.Text(participant),
+  );
+}
+
+pw.Container buildSingleBracketPdf_withMarginTop(String participant, double margin) {
+  return pw.Container(
+    width: 100, // Set a fixed width for the single bracket container
+    height: 15,
+    padding: pw.EdgeInsets.only(left: 2),
+    margin: pw.EdgeInsets.only(top: margin),
     decoration: pw.BoxDecoration(
       border: pw.Border.all(),
     ),
