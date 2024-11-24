@@ -160,6 +160,11 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
       double marginBottomTracker = 0;
       int bracketsTracker = 0;
 
+      // margin between double brackets (between two signle brackets)
+      const double marginBetweenDoubleBracket = 5;
+      // how many pixels on each side there are more when building double brackets than single bracket
+      double marginOffsetOfDoubleBracket = containerHeight - ((containerHeight-marginBetweenDoubleBracket)/2);
+
       // we are going to build brackets with priorities over each iteration
       // it will be DOUBLE, SINGLE, NO and over again
       for(int i = 0; i < rowsInSecondColumn; i++) {
@@ -177,7 +182,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           iterator += 2;
           bracketsTracker++;
           if(iterator == participants.length - participantsLeft - 2) {
-            marginBottomTracker = calculateBottomMargin(rowsInSecondColumn, bracketsTracker, passingMargin, containerHeight, false);
+            marginBottomTracker = calculateBottomMargin(rowsInSecondColumn, bracketsTracker, passingMargin, containerHeight, false, marginOffsetOfDoubleBracket);
           }
           marginTracker = passingMargin;
           nOfBracketWithOneName--;
@@ -185,23 +190,23 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
         }
         if(nOfBracketWithNoNames > 0) {
           brackets.add(
-            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker - 20, marginBottomTracker)
+            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker - marginOffsetOfDoubleBracket, marginBottomTracker)
           );
           iterator += 2;
           bracketsTracker++;
           if(iterator == participants.length - participantsLeft - 2) {
-            marginBottomTracker = calculateBottomMargin(rowsInSecondColumn, bracketsTracker, passingMargin, containerHeight, true);
+            marginBottomTracker = calculateBottomMargin(rowsInSecondColumn, bracketsTracker, passingMargin, containerHeight, true, marginOffsetOfDoubleBracket);
           }
           brackets.add(
-            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], 10, marginBottomTracker)
+            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginBetweenDoubleBracket, marginBottomTracker)
           );
           iterator += 2;
           bracketsTracker++;
           if(iterator == participants.length - participantsLeft - 2) {
-            marginBottomTracker = calculateBottomMargin(rowsInSecondColumn, bracketsTracker, passingMargin, containerHeight, true);
+            marginBottomTracker = calculateBottomMargin(rowsInSecondColumn, bracketsTracker, passingMargin, containerHeight, true, marginOffsetOfDoubleBracket);
           }
           nOfBracketWithNoNames--;
-          marginTracker = passingMargin - 20;
+          marginTracker = passingMargin - marginOffsetOfDoubleBracket;
           print("build double");
         }
       }
@@ -343,8 +348,8 @@ Future<String> savePdf(Future<Uint8List> pdfData) async {
   return file.path;
 }
 
-double calculateBottomMargin(int numberOfSecondRoundRows, int currentRow, double passingMargin, int containerHeight, bool isDoubleDoubleBracket) {
-  double result = (isDoubleDoubleBracket) ? -20 : 0;
+double calculateBottomMargin(int numberOfSecondRoundRows, int currentRow, double passingMargin, int containerHeight, bool isDoubleDoubleBracket, double marginDiff) {
+  double result = (isDoubleDoubleBracket) ? marginDiff : 0;
   if(isDoubleDoubleBracket) {
     for(int i = currentRow; i < numberOfSecondRoundRows; i++) {
       result += passingMargin;
