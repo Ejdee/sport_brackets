@@ -77,8 +77,9 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
   int rowsNumber = participantsInFirstRound ~/ 2;
   print("rowsNumber: $rowsNumber");
 
+  const int marginBetweenBracket = 10;
   // this is the height of the single bracket container we defined in the single_bracket.dart
-  int containerHeight = 40;
+  int containerHeight = 30 + marginBetweenBracket;
 
   List<pw.Widget> columns = [];
   // flag to check if it is the first round (where we fill the names)
@@ -89,6 +90,12 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
   print("preroundsExisting: $preroundsExisting");
 
   const int extraSpace = 12;
+
+  // margin between double brackets (between two signle brackets)
+  const double marginBetweenDoubleBracket = 5;
+  // how many pixels on each side there are more when building double brackets than single bracket
+  double marginOffsetOfDoubleBracket = containerHeight - ((containerHeight-marginBetweenDoubleBracket)/2);
+
 
   List<int> rounds = [];
   double marginAvailable = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsNumber);
@@ -113,6 +120,12 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
         );
       }
 
+      // since there are no prerounds, it means in second column there will be no names in each bracket
+      // so we add zeros
+      for(int i = 0; i < rowsNumber/2; i++) {
+        nOfParticipantsInSecondRound.add(0);
+      }
+
       // add the number of rows here, because it may be changed after this
       rounds.add(rowsNumber);
 
@@ -130,7 +143,9 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
 
       // calculate the margin available for the brackets in seconds column
       double marginAvailableForSecondRound = a4Height - ((baseMargin*2) + headerHeight + extraSpace) - (containerHeight * rowsInSecondColumn);
+      print("margin available: $marginAvailableForSecondRound");
       double passingMargin = marginAvailableForSecondRound / rowsInSecondColumn;
+      print("passing Marign: $passingMargin");
       // dont forget to add the height of the bracket after = 30
       double onePieceMargin = passingMargin / 2;
       print("One piece margin: $onePieceMargin");
@@ -160,11 +175,6 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
       double marginBottomTracker = 0;
       int bracketsTracker = 0;
 
-      // margin between double brackets (between two signle brackets)
-      const double marginBetweenDoubleBracket = 5;
-      // how many pixels on each side there are more when building double brackets than single bracket
-      double marginOffsetOfDoubleBracket = containerHeight - ((containerHeight-marginBetweenDoubleBracket)/2);
-
       // we are going to build brackets with priorities over each iteration
       // it will be DOUBLE, SINGLE, NO and over again
       for(int i = 0; i < rowsInSecondColumn; i++) {
@@ -176,6 +186,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           nOfBracketWithTwoNames--;
         }
         if(nOfBracketWithOneName > 0) {
+          print("BUILDING: $marginTracker, $marginBottomTracker");
           brackets.add(
             buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker, marginBottomTracker)
           );
@@ -331,6 +342,8 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
     extraSpace: extraSpace,
     columnWidth: columnWidth,
     nOfParticipantsInSecondRoundBracket: nOfParticipantsInSecondRound,
+    marginOffsetOfDoubleBracket: marginOffsetOfDoubleBracket,
+    marginBetweenBracket: marginBetweenBracket,
   ));
 
   print("nOfParticipantsInSecondRound: $nOfParticipantsInSecondRound");
