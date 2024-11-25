@@ -14,6 +14,19 @@ pw.Container buildDoubleBracketPdf(String participant1, String participant2, dou
   );
 }
 
+pw.Container buildDoubleBlank(double marginTop, double marginBottom) {
+  return pw.Container(
+    width: 100, // Set a fixed width for the double bracket container
+    margin: pw.EdgeInsets.only(top: marginTop, bottom: marginBottom),
+    child: pw.Column(
+      children: [
+        buildSingleBlank(5),
+        buildSingleBlank(5),
+      ],
+    ),
+  );
+}
+
 pw.Container buildSingleBracketPdf(String participant) {
   return pw.Container(
     width: 100, // Set a fixed width for the single bracket container
@@ -49,5 +62,17 @@ pw.Container buildSingleBracketPdf_withMarginTop(String participant, double marg
       border: pw.Border.all(color: PdfColors.blue),
     ),
     child: pw.Text(participant),
+  );
+}
+
+pw.Container buildSingleBlank(double margin) {
+  return pw.Container(
+    width: 100, // Set a fixed width for the single bracket container
+    height: 15,
+    padding: pw.EdgeInsets.only(left: 2),
+    margin: pw.EdgeInsets.only(top: margin),
+    decoration: pw.BoxDecoration(
+      border: pw.Border.all(color: PdfColors.white),
+    ),
   );
 }
