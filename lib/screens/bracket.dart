@@ -175,6 +175,11 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
       double marginBottomTracker = 0;
       int bracketsTracker = 0;
 
+      // take track of how many brackets we have builded so far
+      int buildedTracker = 0;
+      // we take the available margin and subtract the space, that is contained in the containers - so we get the free margin we have to add somewhere
+      double marginToFill = marginAvailableForSecondRound + (containerHeight*rowsInSecondColumn) - (containerHeight*nOfBracketWithOneName) - ((containerHeight + marginOffsetOfDoubleBracket* 2)*nOfBracketWithNoNames);
+
       // we are going to build brackets with priorities over each iteration
       // it will be DOUBLE, SINGLE, NO and over again
       for(int i = 0; i < rowsInSecondColumn; i++) {
@@ -184,12 +189,30 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           print("marginTrackerADDED: $marginTracker");
           bracketsTracker++;
           nOfBracketWithTwoNames--;
+          // if we wont build any brackets, we want to subtract the margin of one bracket with margin around from free margin
+          marginToFill -= (passingMargin+containerHeight);
         }
         if(nOfBracketWithOneName > 0) {
-          print("BUILDING: $marginTracker, $marginBottomTracker");
-          brackets.add(
-            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker, marginBottomTracker)
-          );
+          // if it is the last bracket we will build in the column, we put the free margin available in the margin bottom of that
+          if(buildedTracker == rowsNumber-1) {
+            brackets.add(
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker, marginToFill-marginTracker)
+            );
+
+          // otherwise we will build the bracket normally
+          } else {
+            brackets.add(
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker, marginBottomTracker)
+            );
+          }
+
+          print("build single");
+
+          buildedTracker++;
+          // change the free margin according to what we have builded
+          marginToFill -= passingMargin;
+
+          // increment the participants
           iterator += 2;
           bracketsTracker++;
           if(iterator == participants.length - participantsLeft - 2) {
@@ -197,20 +220,40 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           }
           marginTracker = passingMargin;
           nOfBracketWithOneName--;
-          print("build single");
         }
         if(nOfBracketWithNoNames > 0) {
+          
+          // print the first bracket normally
+          print("build double");
           brackets.add(
             buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker - marginOffsetOfDoubleBracket, marginBottomTracker)
           );
+
+          buildedTracker++;
+          // here we have to subtract the margin on top but we have to add the offset back
+          marginToFill -= (onePieceMargin-marginOffsetOfDoubleBracket);
+
           iterator += 2;
           bracketsTracker++;
           if(iterator == participants.length - participantsLeft - 2) {
             marginBottomTracker = calculateBottomMargin(rowsInSecondColumn, bracketsTracker, passingMargin, containerHeight, true, marginOffsetOfDoubleBracket);
           }
-          brackets.add(
-            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginBetweenDoubleBracket, marginBottomTracker)
-          );
+
+          // if it is the last bracket in the column, we have to put there the free margin which will be subtracted by margin between those brackets and the offset to get the correct value
+          if(buildedTracker == rowsNumber-1){
+            print("margin to fill: $marginToFill");
+            brackets.add(
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginBetweenDoubleBracket, marginToFill)
+            );
+          } else {
+            brackets.add(
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginBetweenDoubleBracket, marginBottomTracker)
+            );
+          }
+
+          buildedTracker++;
+          marginToFill -= (onePieceMargin-marginOffsetOfDoubleBracket);
+
           iterator += 2;
           bracketsTracker++;
           if(iterator == participants.length - participantsLeft - 2) {
@@ -218,7 +261,6 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           }
           nOfBracketWithNoNames--;
           marginTracker = passingMargin - marginOffsetOfDoubleBracket;
-          print("build double");
         }
       }
 
