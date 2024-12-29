@@ -407,9 +407,22 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
 }
 
 Future<String> savePdf(Future<Uint8List> pdfData) async {
-  final output = await getTemporaryDirectory();
-  final file = File("${output.path}/bracket.pdf");
+  // Get the current working directory
+  final programDir = Directory.current;
+
+  // Define the desired path
+  final outputDir = Directory("${programDir.path}/pavouk");
+  final filePath = "${outputDir.path}/file.pdf";
+
+  // Ensure the directory exists
+  if (!outputDir.existsSync()) {
+    outputDir.createSync(recursive: true);
+  }
+
+  // Write the PDF file
+  final file = File(filePath);
   await file.writeAsBytes(await pdfData);
+
   return file.path;
 }
 
