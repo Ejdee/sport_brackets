@@ -5,6 +5,7 @@ class CategoryInputScreen extends StatefulWidget {
   final TextEditingController rankController;
   final TextEditingController weightController;
   final ValueNotifier<String> categoryNotifier;
+  final ValueNotifier<String> genderNotifier;
 
   CategoryInputScreen({
     super.key,
@@ -12,6 +13,7 @@ class CategoryInputScreen extends StatefulWidget {
     required this.rankController,
     required this.weightController,
     required this.categoryNotifier,
+    required this. genderNotifier,
   });
 
   @override
@@ -21,6 +23,9 @@ class CategoryInputScreen extends StatefulWidget {
 class _CategoryInputScreenState extends State<CategoryInputScreen> {
   // List of categories
   final List<String> categories = ["Kata", "Kumite"];
+
+  // Value notifier for gender
+  final ValueNotifier<String> genderNotifier = ValueNotifier<String>('female');
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +91,7 @@ class _CategoryInputScreenState extends State<CategoryInputScreen> {
                           children: [
                             Icon(Icons.add, color: Colors.blue),
                             SizedBox(width: 10),
-                            Text("Add New Category", style: TextStyle(color: Colors.blue)),
+                            Text("Přidat kategorii", style: TextStyle(color: Colors.blue)),
                           ],
                         ),
                       ),
@@ -105,7 +110,7 @@ class _CategoryInputScreenState extends State<CategoryInputScreen> {
                           valueListenable: widget.categoryNotifier,
                           builder: (context, value, child) {
                             return Text(
-                              value.isNotEmpty ? value : "Select a category",
+                              value.isNotEmpty ? value : "Vybrat kategorii",
                               style: const TextStyle(color: Colors.black),
                             );
                           },
@@ -126,7 +131,7 @@ class _CategoryInputScreenState extends State<CategoryInputScreen> {
             alignment: Alignment.centerLeft,
             child: FractionallySizedBox(
               widthFactor: 1 / 3,
-              child: _buildTextField(screenWidth, widget.ageController, 'Enter age'),
+              child: _buildTextField(screenWidth, widget.ageController, 'Zadejte věk'),
             ),
           ),
           const SizedBox(height: 20),
@@ -136,7 +141,7 @@ class _CategoryInputScreenState extends State<CategoryInputScreen> {
             alignment: Alignment.centerLeft,
             child: FractionallySizedBox(
               widthFactor: 1 / 3,
-              child: _buildTextField(screenWidth, widget.rankController, 'Enter rank'),
+              child: _buildTextField(screenWidth, widget.rankController, 'Zadejte kyu'),
             ),
           ),
           const SizedBox(height: 20),
@@ -146,7 +151,57 @@ class _CategoryInputScreenState extends State<CategoryInputScreen> {
             alignment: Alignment.centerLeft,
             child: FractionallySizedBox(
               widthFactor: 1 / 3,
-              child: _buildTextField(screenWidth, widget.weightController, 'Enter weight'),
+              child: _buildTextField(screenWidth, widget.weightController, 'Zadejte váhu'),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Gender selection
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Pohlaví:",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                ValueListenableBuilder<String>(
+                  valueListenable: widget.genderNotifier,
+                  builder: (context, value, child) {
+                    return Row(
+                      children: [
+                        Radio<String>(
+                          value: 'female',
+                          groupValue: value,
+                          onChanged: (String? newValue) {
+                            widget.genderNotifier.value = newValue!;
+                          },
+                        ),
+                        const Text('Žena'),
+                        const SizedBox(width: 10),
+                        Radio<String>(
+                          value: 'male',
+                          groupValue: value,
+                          onChanged: (String? newValue) {
+                            widget.genderNotifier.value = newValue!;
+                          },
+                        ),
+                        const Text('Muž'),
+                        const SizedBox(width: 10),
+                        Radio<String>(
+                          value: 'both',
+                          groupValue: value,
+                          onChanged: (String? newValue) {
+                            widget.genderNotifier.value = newValue!;
+                          },
+                        ),
+                        const Text('Obě'),
+                      ],
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ],
@@ -188,11 +243,11 @@ class _CategoryInputScreenState extends State<CategoryInputScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Add New Category"),
+          title: const Text("Přidat novou kategorii"),
           content: TextField(
             controller: newCategoryController,
             decoration: const InputDecoration(
-              hintText: "Enter category name",
+              hintText: "Zadejte jméno kategorie",
               border: OutlineInputBorder(),
             ),
           ),
@@ -201,7 +256,7 @@ class _CategoryInputScreenState extends State<CategoryInputScreen> {
               onPressed: () {
                 Navigator.of(context).pop(); // Close dialog
               },
-              child: const Text("Cancel"),
+              child: const Text("Zrušit"),
             ),
             ElevatedButton(
               onPressed: () {

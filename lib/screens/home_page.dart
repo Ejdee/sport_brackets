@@ -20,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _rankController = TextEditingController();
   final ValueNotifier<String> _categoryNotifier = ValueNotifier<String>('Kata');
+  final ValueNotifier<String> _genderNotifier = ValueNotifier<String>('female');
 
   List<Map<String, String>> categoryData = [];
 
@@ -29,6 +30,7 @@ class _HomePageState extends State<HomePage> {
       String age = _ageController.text;
       String weight = _weightController.text;
       String rank = _rankController.text;
+      String gender = _genderNotifier.value;
 
       // add the category to the list of data
       CategoryDataManager.instance.addCategory({
@@ -36,6 +38,7 @@ class _HomePageState extends State<HomePage> {
         'age': age,
         'rank': _rankController.text,
         'weight': _weightController.text,
+        'gender': gender
       });
 
       _categories = List.from(_categories)..add(
@@ -76,7 +79,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          CategoryInputScreen(ageController: _ageController, rankController: _rankController, weightController: _weightController, categoryNotifier: _categoryNotifier),
+          CategoryInputScreen(ageController: _ageController, rankController: _rankController, weightController: _weightController, categoryNotifier: _categoryNotifier, genderNotifier: _genderNotifier,),
           Padding(
             padding: const EdgeInsets.only(left: 10.0),
             child: Align(

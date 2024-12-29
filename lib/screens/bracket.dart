@@ -7,12 +7,15 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../components/single_bracket.dart';
 import '../data_manage/line_drawing.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategories) async {
   final pw.Document doc = pw.Document();
 
   const double baseMargin = 10;
   const double headerHeight = 30;
+
+  final ttf = pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Regular.ttf'));
 
   // get the width and height of a4 page
   final a4Width = PdfPageFormat.a4.landscape.width;
@@ -50,7 +53,7 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
                   height: headerHeight,
                   child: pw.Text(
                     category,
-                    style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+                    style: pw.TextStyle(font: ttf, fontSize: 24, fontWeight: pw.FontWeight.bold),
                   )
                 ),
               ),
@@ -174,6 +177,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
       double marginTracker = onePieceMargin;
       double marginBottomTracker = 0;
       int bracketsTracker = 0;
+      int rowsTracker = 0;
 
       // take track of how many brackets we have builded so far
       int buildedTracker = 0;
@@ -188,6 +192,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           marginTracker += (passingMargin+containerHeight);
           print("marginTrackerADDED: $marginTracker");
           bracketsTracker++;
+          rowsTracker++;
           nOfBracketWithTwoNames--;
           // if we wont build any brackets, we want to subtract the margin of one bracket with margin around from free margin
           marginToFill -= (passingMargin+containerHeight);
@@ -195,8 +200,11 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
         if(nOfBracketWithOneName > 0) {
           // if it is the last bracket we will build in the column, we put the free margin available in the margin bottom of that
           if(buildedTracker == rowsNumber-1) {
+            print("ano");
+            double bottomMarginToAdd = onePieceMargin + (containerHeight * (rowsInSecondColumn - (rowsTracker+1)) + passingMargin * (rowsInSecondColumn- (rowsTracker+1)));
+            print(bottomMarginToAdd);
             brackets.add(
-              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker, marginToFill-marginTracker)
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker, bottomMarginToAdd)
             );
 
           // otherwise we will build the bracket normally
@@ -215,6 +223,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           // increment the participants
           iterator += 2;
           bracketsTracker++;
+          rowsTracker++;
           if(iterator == participants.length - participantsLeft - 2) {
             marginBottomTracker = calculateBottomMargin(rowsInSecondColumn, bracketsTracker, passingMargin, containerHeight, false, marginOffsetOfDoubleBracket);
           }
@@ -261,6 +270,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           }
           nOfBracketWithNoNames--;
           marginTracker = passingMargin - marginOffsetOfDoubleBracket;
+          rowsTracker++;
         }
       }
 

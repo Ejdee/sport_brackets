@@ -6,14 +6,14 @@ import '../data_manage/category_manager.dart';
 
 TextButton createLoadButton(BuildContext context) {
   return TextButton(
-    child: const Text('Load'),
+    child: const Text('Nahrát soutěžící'),
     onPressed: () {
       final loadController = TextEditingController();
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Enter Google Sheets URL'),
+            title: const Text('Zadejte Google Sheets URL'),
             content: TextField(
               controller: loadController,
             ),
@@ -29,6 +29,9 @@ TextButton createLoadButton(BuildContext context) {
                   // get the category data
                   var cmdata = CategoryDataManager.instance.categoryData;
 
+                  var categoryNames = await loadCategoryNames(url);
+
+
                   // variable to store the categories and the names
                   var filteredCategoriesVar = FilteredCategoryDataManager.instance.filteredCategories;
 
@@ -39,34 +42,67 @@ TextButton createLoadButton(BuildContext context) {
                     for(var person in gsheetData) {
                       // make variable for each data
                       String name = person[0];
-                      int age = int.parse(person[1]);
-                      double weight = double.parse(person[2]);
-                      int rank = int.parse(person[3]);
+                      String gender = person[1];
+                      int age = int.parse(person[2]);
+                      double weight = double.parse(person[3]);
+                      int rank = int.parse(person[4]);
 
                       bool fits = true;
 
-                      // check if the person competes in the category
-                      if(category['categoryType'] == 'Kata' && person[4] != 'ano') {
+                      //// check if the person competes in the category
+                      //if(category['categoryType'] == 'Kata' && person[5] != 'ano') {
+                      //  fits = false;
+                      //} else if (category['categoryType'] == 'Kumite' && person[6] != 'ano') {
+                      //  fits = false;
+                      //} else if (category['categoryType'] == 'Agility' && person[7] != 'ano') {
+                      //  fits = false;
+                      //} else if (category['categoryType'] == 'Rychlost' && person[8] != 'ano') {
+                      //  fits = false;
+                      //}
+
+                      // starting column of category names in google sheets
+                      int i = 5;
+                      for(var name in categoryNames) {
+                        if(category['categoryType']!.toLowerCase() == name.toLowerCase() && person[i] != 'ano') {
+                          fits = false; 
+                        }
+                        i++;
+                      }
+
+                      if(category['gender'] == 'female' && gender != "žena") {
                         fits = false;
-                      } else if (category['categoryType'] == 'Kumite' && person[5] != 'ano') {
-                        fits = false;
-                      } else if (category['categoryType'] == 'Agility' && person[6] != 'ano') {
-                        fits = false;
-                      } else if (category['categoryType'] == 'Rychlost' && person[7] != 'ano') {
+                      } else if (category['gender'] == 'male' && gender != "muž")  {
                         fits = false;
                       }
 
                       // check the age
-                      var ageRange = category['age']?.split('-').map(int.parse).toList();
-                      if(age < ageRange![0] || age > ageRange[1]) {
-                        fits = false;
+                      if(category['age'] != ""){
+                        var ageRange = category['age']?.split('-').map(int.parse).toList();
+                        if(age < ageRange![0] || age > ageRange[1]) {
+                          fits = false;
+                        }
                       }
 
-                      if(category['rank'] != "") {
-                        // check the rank - ALERT: rank is descending
+                      // check the rank
+                      if (category['rank'] != "") {
+                        // Parse the rank string
                         var rankRange = category['rank']?.split('-').map(int.parse).toList();
-                        if(rank > rankRange![0] || rank < rankRange[1]) {
-                          fits = false;
+
+                        if (rankRange != null && rankRange.isNotEmpty) {
+                          if (rankRange.length == 1) {
+                            // Single number
+                            if (rank != rankRange[0]) {
+                              fits = false;
+                            }
+                          } else if (rankRange.length == 2) {
+                            // Range
+                            if (rank > rankRange[0] || rank < rankRange[1]) {
+                              fits = false;
+                            }
+                          } else {
+                            // Invalid format
+                            throw FormatException('Invalid rank format: ${category['rank']}');
+                          }
                         }
                       }
 
@@ -79,8 +115,16 @@ TextButton createLoadButton(BuildContext context) {
                       }
 
                       if(fits) {
+                        String genderName = "";
+                        if(category['gender'] == 'male') {
+                          genderName = "Muži";
+                        } else if (category['gender'] == 'female') {
+                          genderName = "Ženy";
+                        } else if (category['gender'] == 'both') {
+                          genderName = 'Smíšené';
+                        }
                         // add the person to the category
-                        String categoryName = '${category['categoryType']}_${category['age']}_${category['weight']}_${category['rank']}';
+                        String categoryName = '${category['categoryType']}, ${category['age']} let,${category['weight']} kg, ${category['rank']} kyu, $genderName';
 
                         FilteredCategoryDataManager.instance.addCategory(categoryName, name); 
                       }
@@ -122,10 +166,43 @@ Future<List<List<dynamic>>> loadGoogleSheetData(String url) async {
     final sheet = spreadsheet.sheets.first;
 
     // Fetch the data from the sheet
-    final data = await sheet.values.allRows(fromRow: 3, fromColumn: 2);
+    final data = await sheet.values.allRows(fromRow: 2, fromColumn: 1);
 
     print('Loaded data: $data');
     return data;
+  } catch (e) {
+    print('Error loading Google Sheet: $e');
+    throw Exception('Data loading failed');
+  }
+}
+
+Future<List<dynamic>> loadCategoryNames(String url) async {
+  try {
+    // Load credentials from assets
+    final jsonString = await rootBundle.loadString('assets/credentials.json');
+    final credentials = jsonDecode(jsonString);
+
+    if (credentials['type'] != 'service_account') {
+      throw Exception('Invalid credentials type');
+    }
+
+    // Initialize gsheets
+    final gsheets = GSheets(credentials);
+
+    // Extract spreadsheet ID from the URL
+    final spreadsheetId = extractSpreadsheetId(url);
+
+    // Fetch the spreadsheet
+    final spreadsheet = await gsheets.spreadsheet(spreadsheetId);
+
+    // Fetch the first worksheet (you can specify other worksheets if needed)
+    final sheet = spreadsheet.sheets.first;
+
+    // Fetch the data from the sheet
+    final names = await sheet.values.row(1, fromColumn: 6);
+
+    print('Loaded data: $names');
+    return names;
   } catch (e) {
     print('Error loading Google Sheet: $e');
     throw Exception('Data loading failed');
