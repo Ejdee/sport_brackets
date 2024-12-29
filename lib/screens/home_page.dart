@@ -113,20 +113,44 @@ class _HomePageState extends State<HomePage> {
                 CustomButton(
                   text: 'Vytvořit pavouky',
                   onPressed: () async {
+                    try {
                       final pdfData = generateBracketPdf(FilteredCategoryDataManager.instance.filteredCategories);
                       final path = await savePdf(pdfData);
                       print('PDF saved to $path');
-                    //setState(() {
-                      // I DONT KNOW YET
 
-                      //Navigator.push(
-                      //  context,
-                      //  MaterialPageRoute(
-                      //    builder: (context) => BracketScreen(),
-                      //  )
-                      //);
-                    //});
-                  }
+                      // Show a dialog with the path
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text('Pavouci vytvořeny.'),
+                          content: Text('PDF bylo uloženo do složky -pavouk- ve složce programu.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close dialog
+                              },
+                              child: const Text('Zavřít'),
+                            ),
+                          ],
+                        ),
+                      );
+                    } catch (e) {
+                      print('Error saving PDF: $e');
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text('Error'),
+                          content: const Text('Pavouky se nepodařilo vytvořit. Zkuste to prosím znovu.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Uzavřít'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
                 ),
               ],
             ),
