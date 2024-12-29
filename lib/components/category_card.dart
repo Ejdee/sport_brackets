@@ -22,8 +22,20 @@ class CategoryCard extends StatelessWidget {
   final String? rank;
   final Function onDelete;
   final String categoryNotifier;
+  final String gender;
 
-  const CategoryCard({required Key key, required this.age, this.weight, this.rank, required this.onDelete, required this.categoryNotifier}) : super(key: key);
+  const CategoryCard({required Key key, required this.age, this.weight, this.rank, required this.onDelete, required this.categoryNotifier, required this.gender}) : super(key: key);
+
+  String get finalGender {
+    if (gender == "female") {
+      return "ženy";
+    } else if (gender == "male") {
+      return "muži";
+    } else if (gender == "both") {
+      return "smíšené";
+    }
+    return "";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +54,11 @@ class CategoryCard extends StatelessWidget {
                 Center( // Add this line
                   child: Text(categoryNotifier, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)), // Wrap this line
                 ), // Add this line
-                StyledText(text: 'Age: $age'),
+                StyledText(text: 'Věk: $age'),
                 // show these two only if it is not empty string
-                rank != "" ? StyledText(text: 'Rank: $rank') : Container(),
-                weight != "" ? StyledText(text: 'Weight: $weight') : Container(),
+                rank != "" ? StyledText(text: 'Kyu: $rank') : Container(),
+                weight != "" ? StyledText(text: 'Váha: $weight') : Container(),
+                gender != "" ? StyledText(text: 'Pohlaví: $finalGender') : Container(),
               ],
             ),
           ),

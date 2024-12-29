@@ -244,6 +244,15 @@ void drawBracketLines(DrawBracketLinesParams params) {
       }
     }
   }
+
+
+  // get the width and height of a4 page
+  final a4Width = PdfPageFormat.a4.landscape.width;
+
+  drawLine(params.context, a4Width-250, 150, a4Width-90, 150);
+  drawLine(params.context, a4Width-250, 125, a4Width-90, 125);
+  drawLine(params.context, a4Width-250, 100, a4Width-90, 100);
+  drawLine(params.context, a4Width-250, 75, a4Width-90, 75);
 }
 
 void drawLine(pw.Context context, double x1, double y1, double x2, double y2) {

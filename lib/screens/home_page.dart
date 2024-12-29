@@ -58,6 +58,7 @@ class _HomePageState extends State<HomePage> {
             });
           },
           categoryNotifier: _categoryNotifier.value,
+          gender: gender,
         )
       );
     });
@@ -74,7 +75,7 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.only(top: 20.0, left: 10.0),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text('Add New Category',
+              child: Text('Přidat novou kategorii',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
@@ -95,7 +96,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 child: const Text(
-                  'Add Category',
+                  'Přidat kategorii',
                   style: TextStyle(color: Colors.white), // Text color
                 ),
               ),
@@ -110,7 +111,7 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 CustomButton(
-                  text: 'Create Brackets',
+                  text: 'Vytvořit pavouky',
                   onPressed: () async {
                       final pdfData = generateBracketPdf(FilteredCategoryDataManager.instance.filteredCategories);
                       final path = await savePdf(pdfData);
