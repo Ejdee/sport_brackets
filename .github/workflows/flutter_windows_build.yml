@@ -17,9 +17,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Set up Flutter (using the exact version you are using locally)
+      # Step 2: Set up Flutter using subosito/flutter-action
       - name: Set up Flutter
-        uses: actions/setup-flutter@v2
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.27.1'  # Use your exact Flutter version here
 
@@ -36,4 +36,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: windows-build
-          path: build/windows/runner/Release/brackets_karate.exe
+          path: build/windows/runner/Release/your_project_name.exe
