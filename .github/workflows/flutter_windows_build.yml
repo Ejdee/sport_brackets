@@ -3,10 +3,10 @@ name: Flutter Windows Build
 on:
   push:
     branches:
-      - forking  # Adjust this to your default branch if it's not `main`
+      - forking  # Trigger workflow on push to the 'forking' branch
   pull_request:
     branches:
-      - forking
+      - forking  # Trigger workflow on pull request to the 'forking' branch
 
 jobs:
   build:
@@ -17,11 +17,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Set up Flutter environment
+      # Step 2: Set up Flutter (using the exact version you are using locally)
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: actions/setup-flutter@v2
         with:
-          flutter-version: 'stable'  # You can specify a specific version if needed
+          flutter-version: '3.27.1'  # Use your exact Flutter version here
 
       # Step 3: Install dependencies
       - name: Install dependencies
@@ -36,4 +36,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: windows-build
-          path: build/windows/runner/Release/your_project_name.exe
+          path: build/windows/runner/Release/brackets_karate.exe
