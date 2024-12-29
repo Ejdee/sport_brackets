@@ -13,7 +13,17 @@ TextButton createLoadButton(BuildContext context) {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Zadejte Google Sheets URL'),
+            title: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Zadejte Google Sheets URL'),
+                SizedBox(height: 5),
+                Text(
+                  'POZOR: udělat až po vytvoření všech kategorií.',
+                  style: TextStyle(color: Colors.red, fontSize: 16),
+                )
+              ]
+            ),
             content: TextField(
               controller: loadController,
             ),
@@ -75,17 +85,30 @@ TextButton createLoadButton(BuildContext context) {
                         fits = false;
                       }
 
-                      // check the age
-                      if(category['age'] != ""){
+                      // Check the age
+                      if (category['age'] != "") {
                         var ageRange = category['age']?.split('-').map(int.parse).toList();
-                        if(age < ageRange![0] || age > ageRange[1]) {
-                          fits = false;
+
+                        if (ageRange != null && ageRange.isNotEmpty) {
+                          if (ageRange.length == 1) {
+                            // Single number
+                            if (age != ageRange[0]) {
+                              fits = false;
+                            }
+                          } else if (ageRange.length == 2) {
+                            // Range
+                            if (age < ageRange[0] || age > ageRange[1]) {
+                              fits = false;
+                            }
+                          } else {
+                            // Invalid format
+                            throw FormatException('Invalid age format: ${category['age']}');
+                          }
                         }
                       }
 
-                      // check the rank
+                      // Check the rank
                       if (category['rank'] != "") {
-                        // Parse the rank string
                         var rankRange = category['rank']?.split('-').map(int.parse).toList();
 
                         if (rankRange != null && rankRange.isNotEmpty) {
@@ -106,13 +129,28 @@ TextButton createLoadButton(BuildContext context) {
                         }
                       }
 
-                      // check the weight
-                      if(category['weight'] != "") {
+                      // Check the weight
+                      if (category['weight'] != "") {
                         var weightRange = category['weight']?.split('-').map(double.parse).toList();
-                        if(weight < weightRange![0] || weight > weightRange[1]) {
-                          fits = false;
+
+                        if (weightRange != null && weightRange.isNotEmpty) {
+                          if (weightRange.length == 1) {
+                            // Single number
+                            if (weight != weightRange[0]) {
+                              fits = false;
+                            }
+                          } else if (weightRange.length == 2) {
+                            // Range
+                            if (weight < weightRange[0] || weight > weightRange[1]) {
+                              fits = false;
+                            }
+                          } else {
+                            // Invalid format
+                            throw FormatException('Invalid weight format: ${category['weight']}');
+                          }
                         }
                       }
+
 
                       if(fits) {
                         String genderName = "";
