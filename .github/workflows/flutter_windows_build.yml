@@ -1,0 +1,39 @@
+name: Flutter Windows Build
+
+on:
+  push:
+    branches:
+      - forking  # Adjust this to your default branch if it's not `main`
+  pull_request:
+    branches:
+      - forking
+
+jobs:
+  build:
+    runs-on: windows-latest  # This sets up the environment for Windows
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Flutter environment
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'  # You can specify a specific version if needed
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Step 4: Build the Windows app
+      - name: Build Windows app
+        run: flutter build windows --release
+
+      # Optional: Step 5: Upload the build artifacts (to download later)
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: build/windows/runner/Release/your_project_name.exe
