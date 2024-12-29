@@ -70,6 +70,11 @@ void drawBracketLines(DrawBracketLinesParams params) {
 
           // we take the column width, subtract the width of the container and divide it by 4 to get the end position 
           double xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/4);
+          if(params.rows.length <= 3) {
+            xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/2)+15;
+          } else if (params.rows.length == 4) {
+            xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/4)-15;
+          }
 
           // distance from forked fork to fork 
           const int lineOffset = 15;
@@ -114,6 +119,11 @@ void drawBracketLines(DrawBracketLinesParams params) {
 
       // we take the column width, subtract the width of the container and divide it by 4 to get the end position 
       double xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/4);
+      if(params.rows.length <= 3) {
+        xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/2)+15;
+      } else if (params.rows.length == 4) {
+        xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/4)-15;
+      }
 
       for(int j = 0; j < params.rows[i]; j+=2) {
         print("ypos+diff*j: ${yPos+diff*j}");
@@ -156,6 +166,11 @@ void drawBracketLines(DrawBracketLinesParams params) {
 
       double xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/4) + params.columnWidth;
       const int lineOffset = 15;
+      if(params.rows.length <= 3) {
+        xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/2)+ params.columnWidth + 15;
+      } else if (params.rows.length == 4) {
+        xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/4) + params.columnWidth -15;
+      }
 
       // if there are some brackets that needs to be drawn again, do it
       if(indexOfTwos.isNotEmpty) {
@@ -173,9 +188,11 @@ void drawBracketLines(DrawBracketLinesParams params) {
       for(int j = 0; j < params.rows[i]; j++) {
 
         // if the row is even, we want to draw the big vertical that connects two brackets and horizontal that goes to the next bracket in the next row
-        if(j % 2 == 0) {
+        if(j % 2 == 0 && params.rows[i] != 1) {
           drawLine(params.context, params.columnWidth*(i+1)+lineOffset, yPos+diff*j, params.columnWidth*(i+1)+lineOffset, yPos+diff*(j+1));
           drawLine(params.context, params.columnWidth*(i+1)+lineOffset, (yPos+diff*(j+1)) - marginPassed/2 - params.containerHeight/2, params.columnWidth*(increment+2)/2, (yPos+diff*(j+1)) - marginPassed/2 - params.containerHeight/2);
+        } else if (j % 2 == 0 && params.rows[i] == 1) {
+          drawLine(params.context, params.columnWidth*(i+1)+lineOffset, (yPos+diff*(j)), (params.columnWidth*(increment+2)/2)-40, (yPos+diff*(j)));
         }
 
         // we want to skip the row, that we drew before
