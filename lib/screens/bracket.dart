@@ -8,6 +8,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../components/single_bracket.dart';
 import '../data_manage/line_drawing.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'dart:math';
 
 Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategories) async {
   final pw.Document doc = pw.Document();
@@ -36,6 +37,9 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
         return participant;
       }
     }).toList();
+
+    truncatedParticipants.shuffle(Random());
+
     print(truncatedParticipants);
 
     doc.addPage(
