@@ -170,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                         context: context,
                         builder: (_) => AlertDialog(
                           title: const Text('Error'),
-                          content: const Text('Pavouky se nepodařilo vytvořit. Zkuste to prosím znovu.'),
+                          content: const Text('Kategorie obsahuje 1 či méně soutěžících.'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
