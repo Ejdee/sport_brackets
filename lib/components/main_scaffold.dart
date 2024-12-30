@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'load_button.dart';
+import 'package:flutter/services.dart';
 
 class MainScaffold extends StatelessWidget {
   final Widget body;
+
+  void onReset() {
+    // This will simulate a close of the app
+    SystemNavigator.pop(); // Close the app
+  }
 
   MainScaffold({required this.body});
 
@@ -18,7 +24,7 @@ class MainScaffold extends StatelessWidget {
                 color: Colors.grey.withOpacity(0.3),
                 spreadRadius: 5,
                 blurRadius: 7,
-                offset: const Offset(0, 3), // changes position of shadow
+                offset: const Offset(0, 3), // Changes position of shadow
               ),
             ],
           ),
@@ -31,9 +37,14 @@ class MainScaffold extends StatelessWidget {
               ],
             ),
             actions: <Widget>[
-              createLoadButton(context),
+              createLoadButton(context), // Existing load button
+              //IconButton(
+              //  icon: const Icon(Icons.refresh), // Reset button icon
+              //  onPressed: onReset, // Reset logic
+              //  tooltip: 'Reset State',
+              //),
             ],
-            elevation: 0.0, // remove elevation from AppBar
+            elevation: 0.0, // Removes elevation from AppBar
           ),
         ),
       ),
