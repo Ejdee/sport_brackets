@@ -30,7 +30,8 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
     var truncatedParticipants = participants.map((participant) {
       var singleParts = participant.split(" ");
       if (singleParts.length > 1) {
-        return '${singleParts[0][0]}. ${singleParts.sublist(1).join(' ')}';
+        //return '${singleParts[0][0]}. ${singleParts.sublist(1).join(' ')}';
+        return participant;
       } else {
         return participant;
       }
@@ -57,7 +58,7 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
                   )
                 ),
               ),
-              _buildRoundsPdf(truncatedParticipants, a4Width, a4Height, totalColumns, baseMargin, headerHeight, context),
+              _buildRoundsPdf(truncatedParticipants, a4Width, a4Height, totalColumns, baseMargin, headerHeight, context, ttf),
             ],
           );
         },
@@ -68,7 +69,7 @@ Future<Uint8List> generateBracketPdf(Map<String, List<String>> filteredCategorie
   return doc.save();
 }
 
-pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4Height, int numberOfColumns, double baseMargin, double headerHeight, pw.Context context) {
+pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4Height, int numberOfColumns, double baseMargin, double headerHeight, pw.Context context, final ttf) {
   // calculate width of one column
   double columnWidth = a4Width / numberOfColumns;
   // get the number of prerounds if there are any
@@ -119,7 +120,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
         String participant2 = i + 1 < participants.length ? participants[i + 1] : '';
         // if it is the last row then we dont want to add margin to the bottom
         brackets.add(
-          buildDoubleBracketPdf(participant1, participant2, (marginAvailable / rowsNumber)/2, (marginAvailable / rowsNumber)/2),
+          buildDoubleBracketPdf(participant1, participant2, (marginAvailable / rowsNumber)/2, (marginAvailable / rowsNumber)/2, ttf),
         );
       }
 
@@ -204,13 +205,13 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
             double bottomMarginToAdd = onePieceMargin + (containerHeight * (rowsInSecondColumn - (rowsTracker+1)) + passingMargin * (rowsInSecondColumn- (rowsTracker+1)));
             print(bottomMarginToAdd);
             brackets.add(
-              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker, bottomMarginToAdd)
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker, bottomMarginToAdd, ttf)
             );
 
           // otherwise we will build the bracket normally
           } else {
             brackets.add(
-              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker, marginBottomTracker)
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker, marginBottomTracker, ttf)
             );
           }
 
@@ -235,7 +236,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           // print the first bracket normally
           print("build double");
           brackets.add(
-            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker - marginOffsetOfDoubleBracket, marginBottomTracker)
+            buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginTracker - marginOffsetOfDoubleBracket, marginBottomTracker, ttf)
           );
 
           buildedTracker++;
@@ -252,11 +253,11 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           if(buildedTracker == rowsNumber-1){
             print("margin to fill: $marginToFill");
             brackets.add(
-              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginBetweenDoubleBracket, marginToFill)
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginBetweenDoubleBracket, marginToFill, ttf)
             );
           } else {
             brackets.add(
-              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginBetweenDoubleBracket, marginBottomTracker)
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], marginBetweenDoubleBracket, marginBottomTracker, ttf)
             );
           }
 
@@ -315,7 +316,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
         while(bracketTracker != rowsNumber) {
           if(nOfBracketWithTwoNames > 0) {
             brackets.add(
-              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], (marginAvailable / rowsNumber)/2, (marginAvailable / rowsNumber)/2),
+              buildDoubleBracketPdf(participants[iterator], participants[iterator+1], (marginAvailable / rowsNumber)/2, (marginAvailable / rowsNumber)/2, ttf),
             );
             iterator += 2;
             nOfBracketWithTwoNames--;
@@ -324,7 +325,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           }
           if(nOfBracketWithOneName > 0) {
             brackets.add(
-              buildDoubleBracketPdf(participants[iterator], "", (marginAvailable / rowsNumber)/2, (marginAvailable / rowsNumber)/2),
+              buildDoubleBracketPdf(participants[iterator], "", (marginAvailable / rowsNumber)/2, (marginAvailable / rowsNumber)/2, ttf),
             );
             iterator++;
             nOfBracketWithOneName--;
@@ -333,7 +334,7 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
           }
           if(nOfBracketWithNoNames > 0) {
             brackets.add(
-              buildDoubleBracketPdf("", "", (marginAvailable / rowsNumber)/2, (marginAvailable / rowsNumber)/2),
+              buildDoubleBracketPdf("", "", (marginAvailable / rowsNumber)/2, (marginAvailable / rowsNumber)/2, ttf),
             );
             nOfBracketWithNoNames--;
             bracketTracker++;
@@ -350,13 +351,13 @@ pw.Widget _buildRoundsPdf(List<String> participants, double a4Width, double a4He
         // if it is last column then add a single bracket to fill the winner
         if(column == numberOfColumns - 1) {
           brackets.add(
-            buildSingleBracketPdf(""),
+            buildSingleBracketPdf("", ttf),
           );
         } else {
           // otherwise add the empty double brackets
           for(int i = 0; i < rowsNumber; i++) {
             brackets.add(
-              buildDoubleBracketPdf("", "", (marginAvailable / rowsNumber)/2, (marginAvailable / rowsNumber)/2),
+              buildDoubleBracketPdf("", "", (marginAvailable / rowsNumber)/2, (marginAvailable / rowsNumber)/2, ttf),
             );
           }
         }

@@ -37,7 +37,7 @@ void drawBracketLines(DrawBracketLinesParams params) {
 
   double marginAvailable = params.marginAvailable + (params.rows[0] * params.containerHeight);
 
-  const int containerWidth = 100;
+  const int containerWidth = 130;
 
   double check = params.columnWidth;
   print("columnWidth: $check");
@@ -73,7 +73,7 @@ void drawBracketLines(DrawBracketLinesParams params) {
           if(params.rows.length <= 3) {
             xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/2)+15;
           } else if (params.rows.length == 4) {
-            xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/4)-15;
+            xEndOfContainer = params.columnWidth - ((params.columnWidth-containerWidth)/4)-7.5;
           }
 
           // distance from forked fork to fork 
@@ -110,7 +110,7 @@ void drawBracketLines(DrawBracketLinesParams params) {
         }
       }
 
-    } else if (i == 0 && !params.preroundsExisting) {
+    } else if (i == 0 && !params.preroundsExisting && params.rows.length != 2) {
       increment += 2;
       print("$yPos");
       print("marginPassed: $marginPassed");
@@ -233,8 +233,12 @@ void drawBracketLines(DrawBracketLinesParams params) {
       
       // draw the last horizontal line to the next bracket
       for(int j = 0; j < params.rows[i]; j++) {
-        if(i == params.rows.length - 2 && params.rows[i] == 1) {
-          drawLine(params.context, params.columnWidth*(i+1), yPos, (params.columnWidth*(increment)/2) - 40, yPos);
+        if((i == params.rows.length - 2 && params.rows[i] == 1)) {
+          print("HERE!!!!!!");
+          drawLine(params.context, params.columnWidth*(i+1), yPos, (params.columnWidth*(increment)/2) - 60, yPos);
+        } else if (i == 0 && params.rows[i] == 1 && params.rows.length == 2) {
+          drawLine(params.context, params.columnWidth*(i+1), yPos, (params.columnWidth*(increment)/2) - 60, yPos);
+          print("HERE!!!!!!");
         } else {
           if(params.rows[i] >= 2) {
             j++;
