@@ -10,6 +10,7 @@
 .svn/
 migrate_working_dir/
 
+
 # IntelliJ related
 *.iml
 *.ipr
@@ -30,6 +31,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+.vscode/
+
 
 # Symbolication related
 app.*.symbols
@@ -42,3 +45,12 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 >>>>>>> pdf_create
+
+.env
+assets/credentials.json
+.metadata
+android/
+macos/
+ios/
+andriod/
+test/
