@@ -4,19 +4,27 @@ class CategoryDataManager {
   CategoryDataManager._privateConstructor();
   static final CategoryDataManager instance = CategoryDataManager._privateConstructor();
 
-  // data to be shared
+  // Data to be shared
   final List<Map<String, String>> categoryData = [];
 
-  // add category to the list
+  // Add category to the list
   void addCategory(Map<String, String> category) {
     categoryData.add(category);
   }
 
-  // remove the category from the list
+  // Remove the category from the list
   void removeCategory(int index) {
-    categoryData.removeAt(index);
+    if (index >= 0 && index < categoryData.length) {
+      categoryData.removeAt(index);
+    }
+  }
+
+  // Clear all categories
+  void clearAll() {
+    categoryData.clear();
   }
 }
+
 
 class FilteredCategoryDataManager {
   // Singleton

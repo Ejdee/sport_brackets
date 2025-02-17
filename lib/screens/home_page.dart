@@ -20,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _rankController = TextEditingController();
   final ValueNotifier<String> _categoryNotifier = ValueNotifier<String>('Kata');
+  final ValueNotifier<String> _genderNotifier = ValueNotifier<String>('female');
 
   List<Map<String, String>> categoryData = [];
 
@@ -29,13 +30,15 @@ class _HomePageState extends State<HomePage> {
       String age = _ageController.text;
       String weight = _weightController.text;
       String rank = _rankController.text;
+      String gender = _genderNotifier.value;
 
-      // add the category to the list of data
+      // Add the category to the list of data
       CategoryDataManager.instance.addCategory({
         'categoryType': categoryType,
         'age': age,
         'rank': _rankController.text,
         'weight': _weightController.text,
+        'gender': gender
       });
 
       _categories = List.from(_categories)..add(
@@ -46,19 +49,39 @@ class _HomePageState extends State<HomePage> {
           rank: rank,
           onDelete: (key) {
             setState(() {
-              // find the index of the category card to be deleted
+              // Find the index of the category card to be deleted
               var index = _categories.indexWhere((card) => card.key == key);
-              // remove from the list of widgets
+              // Remove from the list of widgets
               _categories.removeAt(index);
-              // remove from the singleton instance
+              // Remove from the singleton instance
               CategoryDataManager.instance.removeCategory(index);
+              print(CategoryDataManager.instance.categoryData);
             });
           },
           categoryNotifier: _categoryNotifier.value,
-        )
+          gender: gender,
+        ),
       );
     });
     print(CategoryDataManager.instance.categoryData);
+  }
+
+  void _resetState() {
+    setState(() {
+      // Reset TextEditingController values
+      _ageController.clear();
+      _weightController.clear();
+      _rankController.clear();
+
+      // Reset ValueNotifiers to their initial states
+      _categoryNotifier.value = 'Kata';
+      _genderNotifier.value = 'female';
+
+      // Clear categories
+      _categories.clear();
+      CategoryDataManager.instance.clearAll();
+      print(CategoryDataManager.instance.categoryData);
+    });
   }
 
   @override
@@ -71,35 +94,46 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.only(top: 20.0, left: 10.0),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text('Add New Category',
+              child: Text('Přidat novou kategorii',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
           ),
-          CategoryInputScreen(ageController: _ageController, rankController: _rankController, weightController: _weightController, categoryNotifier: _categoryNotifier),
+          CategoryInputScreen(
+            ageController: _ageController,
+            rankController: _rankController,
+            weightController: _weightController,
+            categoryNotifier: _categoryNotifier,
+            genderNotifier: _genderNotifier,
+          ),
           Padding(
             padding: const EdgeInsets.only(left: 10.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: ElevatedButton(
-                onPressed: _addCategory,
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all<Color>(Colors.black), // Background color
-                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10), // Rounded corners
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: _addCategory,
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all<Color>(Colors.black), // Background color
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10), // Rounded corners
+                      ),
                     ),
                   ),
+                  child: const Text(
+                    'Přidat kategorii',
+                    style: TextStyle(color: Colors.white), // Text color
+                  ),
                 ),
-                child: const Text(
-                  'Add Category',
-                  style: TextStyle(color: Colors.white), // Text color
-                ),
-              ),
+              ],
             ),
           ),
           Expanded(
-            child: CategoryGrid(key: const Key('categoryGrid'), categories: _categories),
+            child: CategoryGrid(
+              key: const Key('categoryGrid'),
+              categories: _categories,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: 20.0),
@@ -107,31 +141,57 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 CustomButton(
-                  text: 'Create Brackets',
+                  text: 'Vytvořit pavouky',
                   onPressed: () async {
+                    try {
                       final pdfData = generateBracketPdf(FilteredCategoryDataManager.instance.filteredCategories);
                       final path = await savePdf(pdfData);
                       print('PDF saved to $path');
-                    //setState(() {
-                      // I DONT KNOW YET
 
-                      //Navigator.push(
-                      //  context,
-                      //  MaterialPageRoute(
-                      //    builder: (context) => BracketScreen(),
-                      //  )
-                      //);
-                    //});
-                  }
+                      // Show a dialog with the path
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text('Pavouci vytvořeny.'),
+                          content: Text('PDF bylo uloženo do složky -pavouk- ve složce programu.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close dialog
+                              },
+                              child: const Text('Zavřít'),
+                            ),
+                          ],
+                        ),
+                      );
+                    } catch (e) {
+                      print('Error saving PDF: $e');
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text('Error'),
+                          content: const Text('Kategorie obsahuje 1 či méně soutěžících.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Uzavřít'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
                 ),
               ],
             ),
           )
         ],
       ),
+      //onReset: _resetState,
     );
   }
 }
+
 
 class BracketScreen extends StatelessWidget {
   @override
